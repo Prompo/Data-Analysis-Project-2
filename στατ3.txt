@@ -1,0 +1,283 @@
+file_path=file.choose()
+print(file_path)
+data<- read.table( "C:\\Users\\anton\\Downloads\\asfalies.txt",header=TRUE)
+data
+dokimi<-attach(data)
+dokimi 
+cartype<- data$cartype
+agecat<- data$agecat
+district<- data$district
+y<- data$y
+n<- data$n
+cartype
+agecat
+district
+y
+n
+length(n)
+length(y)
+length(district)
+length(agecat)
+length(cartype)
+
+Χ2<-factor(cartype)
+model<-glm(formula = y ~ Χ2 + agecat + district + offset(log(n)), family = poisson)
+model
+summary(model)
+max(residuals(model, type = "deviance"))
+# Εκτύπωση των στατιστικών ελέγχων Wald και Deviance
+cat("Wald Test:\n")
+wald_test <- summary(model)$coefficients[, "Pr(>|z|)"]
+wald_test
+deviance_test1 <- anova(model, test = "Chisq")
+deviance_test1
+cat("Deviance Test:\n")
+deviance_test2 <- 1 - pchisq(model$deviance, df = model$df.residual)
+deviance_test2
+# Εκτύπωση των αποτελεσμάτων
+result <- data.frame(Wald_Test = wald_test, Deviance_Test = deviance_test)
+print(result)
+#-----
+
+new_var<- agecat*cartype
+model1<-glm(formula = y ~ Χ2 + agecat + district+ new_var + offset(log(n)), family = poisson)
+model1
+summary(model1)
+
+new_var<- district*cartype
+model1<-glm(formula = y ~ Χ2 + agecat + district+ new_var + offset(log(n)), family = poisson)
+model1
+summary(model1)
+
+
+new_var<- agecat*district
+model1<-glm(formula = y ~ Χ2 + agecat + district+ new_var + offset(log(n)), family = poisson)
+model1
+summary(model1)
+
+your_data <- data.frame(
+  y_n = y/n,
+  agecat1 = agecat,
+  categorical_variable = factor(rep(c("Category1", "Category2", "Category3", "Category4"), each = 5))
+)
+
+
+
+# Create the scatter plot
+ggplot(data, aes(x = y/n, y = Χ2)) 
+plot(y/n, agecat, main = "Scatter Plot", xlab = "X-axis", ylab = "Y-axis", pch = 16, col = "blue")
+
+#------
+
+step(model,method="backward", test="Chisq") 
+logLik(model) 
+
+
+aic <- AIC(model)
+cat("AIC:", aic, "\n")
+
+
+conf_intervals <- confint(model)
+print(conf_intervals)
+confint.default(model) 
+exp(confint.default(model)) 
+
+for (i in seq_along(conf_intervals[, 1])) {
+  cat(paste("Ο συντελεστής β", i - 1, ": [", conf_intervals[i, 1], ",", conf_intervals[i, 2], "]\n"))
+}
+
+#residuals vs fitted
+plot(model, which = 1)
+
+
+# QQ-Plot για τα υπόλοιπα
+library(car)
+qqPlot(residuals(model), main="QQ Plot for Poisson Regression")
+
+#Cook's distance
+plot(cooks.distance(model), pch = 20, main = "Cook's Distance")
+
+# Leverage-Residuals
+plot(hatvalues(model), residuals(model), pch = 20, main = "Leverage-Residuals Plot")
+
+#Γράφημα Υπολοίπων Pearson και Deviance
+par(mfrow=c(1,2))
+plot(residuals(model, type = "pearson"), main = "Pearson Residuals")
+plot(residuals(model, type = "deviance"), main = "Deviance Residuals")
+
+
+res.deviance<-residuals(model) 
+res.pearson<-residuals(model,type="pearson") 
+plot(agecat, res.deviance,pch=19) 
+plot(agecat, res.pearson,pch=19)
+
+qqnorm(res.pearson) 
+qqline(res.pearson) 
+
+qqnorm(res.deviance) 
+qqline(res.deviance) 
+
+plot(fitted.values(model),res.deviance,xlab='fitted values', ylab='Deviance residuals') 
+abline(h=0) 
+
+data
+model
+
+avPlot(model, variable=district, pch=19)
+avPlot(model, variable=agecat, pch=19)
+crPlot(model, variable=district)
+crPlot(model, variable=agecat)
+crPlot(model, variable=Χ2)
+
+#Υπολοιπα πιθανοφανειας
+deviance_residuals <- residuals(model, type = "deviance")
+
+# Δημιουργήστε ένα διάγραμμα για τα υπολείποντα πιθανοφάνειας
+plot(deviance_residuals, type = "p", main = "Deviance Residuals Plot", ylab = "Deviance Residuals")
+
+# Προσθέστε μια οριζόντια γραμμή στο 0 για ευκολία στον έλεγχο
+abline(h = 0, col = "red", lty = 2)
+
+
+#phase 2-----------------------
+leukaemia<- file.choose()
+leukaemia
+data2<- read.table("C:\\Users\\anton\\Downloads\\leukaemia.txt",header=TRUE)
+data2
+
+age<-data2$age
+smear<- data2$smear
+infiltrate <- data2$infiltrate
+index<- data2$index
+blasts<- data2$blasts
+temperature<- data2$temperature
+response<- data2$response
+
+age
+smear
+infiltrate
+index
+blasts
+temperature
+response
+
+length(age)
+length(smear)
+length(infiltrate)
+length(index)
+length(temperature)
+length(response)
+
+# Εφαρμογή μοντέλου λογιστικής παλινδρόμησης
+logistic_model <- glm(response ~ age + smear + infiltrate + index + blasts + temperature, 
+                      data = data, family = "binomial")
+logistic_model
+# Εκτύπωση των αποτελεσμάτων
+summary(logistic_model)
+
+wald_test <- summary(logistic_model)$coefficients[, "Pr(>|z|)"]
+wald_test
+deviance_test1 <- anova(logistic_model, test = "Chisq")
+deviance_test1
+cat("Deviance Test:\n")
+deviance_test2 <- 1 - pchisq(logistic_model$deviance, df = logistic_model$df.residual)
+deviance_test2
+# Εκτύπωση των αποτελεσμάτων
+result <- data.frame(Wald_Test = wald_test, Deviance_Test = deviance_test)
+print(result)
+
+step(logistic_model,method="backward", test="Chisq") 
+logLik(logistic_model) 
+
+
+aic <- AIC(logistic_model)
+cat("AIC:", aic, "\n")
+
+
+conf_intervals <- confint(logistic_model)
+print(conf_intervals)
+confint.default(logistic_model) 
+exp(confint.default(logistic_model)) 
+
+
+
+
+
+
+
+
+# Στατιστικοί έλεγχοι Wald και Deviance
+wald_test <- summary(logistic_model)$coefficients[, "Pr(>|z|)"]
+deviance_test <- 1 - pchisq(logistic_model$deviance, df = logistic_model$df.residual)
+
+# Εκτύπωση των αποτελεσμάτων
+result <- data.frame(Wald_Test = wald_test, Deviance_Test = deviance_test)
+print(result)
+
+# Υπολογισμός του AIC
+aic <- AIC(logistic_model)
+cat("AIC:", aic, "\n")
+
+#Διάστημα εμπιστοσύνης
+coefficients <- coef(logistic_model)
+print(coefficients)
+
+# Υπολογισμός διαστημάτων εμπιστοσύνης (95%)
+confidence_intervals <- confint(logistic_model)
+print(confidence_intervals)
+
+
+for (i in seq_along(confidence_intervals[, 1])) {
+  cat(paste("Ο συντελεστής β", i - 1, ": [", confidence_intervals[i, 1], ",", confidence_intervals[i, 2], "]\n"))
+}
+
+install.packages("pROC")
+library(pROC)
+
+
+# Προβλέψεις πιθανοτήτων για τα δεδομένα εκπαίδευσης
+predicted_probabilities <- predict(logistic_model, type = "response")
+predicted_probabilities
+# Δημιουργία αντικειμένου ROC
+roc_curve <- roc(response, predicted_probabilities)
+roc_curve
+# Κατασκευή και εμφάνιση της καμπύλης ROC
+plot(roc_curve, main="ROC Curve", col="blue", lwd=2)
+lines(c(0, 1), c(0, 1), col="gray", lty=2, lwd=1.5)  # Τυπική καμπύλη
+
+
+install.packages("verification")
+library(verification)
+roc.plot(response,predicted_probabilities )
+
+residuals(logistic_model)
+rstandard(logistic_model)  
+plot(fitted.values(logistic_model), residuals(logistic_model), xlab='fitted values', ylab='Deviance 
+residuals', pch=19) 
+abline(h=0) 
+
+reslik2<-rstudent(logistic_model)
+par (mfrow=c(2,2)) 
+plot(hatvalues(logistic_model), reslik2, pch=19)
+abline(h=0) 
+plot(reslik2, pch=19) 
+abline(h=0) 
+plot(cooks.distance(logistic_model), pch=19) 
+plot(hatvalues(logistic_model), pch=19) 
+
+#Cook's distance
+plot(cooks.distance(logistic_model), pch = 20, main = "Cook's Distance")
+
+res.pearson2<-residuals(logistic_model,type="pearson") 
+qqnorm(res.pearson2) 
+qqline(res.pearson2)
+
+res.deviance<-residuals(logistic_model,type="deviance") 
+qqnorm(res.deviance) 
+qqline(res.deviance)
+
+install.packages("DHARMa")
+
+
+residuals_dharma <- simulateResiduals(fittedModel = logistic_model, n = 1000)
+plot(residuals_dharma)
